@@ -6,7 +6,6 @@ const Sidebar = ({ currentView, onNavigate, isMobileOpen, onMobileClose, usuario
   const courses = [
     { name: 'Compiladores', icon: 'code-2' },
     { name: 'Teoría de la Computación.', icon: 'book-open' },  // nombre exacto
-    { name: 'Teoría de Lenguajes', icon: 'terminal' },
   ];
 
   const generalPages = [
