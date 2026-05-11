@@ -202,7 +202,7 @@ const TextoBloque = ({ texto }) => {
 };
 
 // ── Componente principal ──────────────────────────────────────────────────────
-const UnidadPage = ({ contenido, onBack }) => {
+const UnidadPage = ({ contenido, onBack, onNextSection, nextSectionLabel }) => {
     const [progreso, setProgreso] = useState(0);
 
     // ✅ Scroll al contentArea al montar
@@ -238,11 +238,15 @@ const UnidadPage = ({ contenido, onBack }) => {
     const numFiguras = items.filter(isGoogleDriveUrl).length;
     const numSecciones = items.filter(i => !isGoogleDriveUrl(i)).length;
 
+    const tipoNormalizado = typeof contenido.tipo === 'string'
+        ? contenido.tipo.toLowerCase()
+        : '';
+
     const tipoBadge = {
         leccion: { label: 'Lección', bg: 'bg-blue-100 text-blue-700' },
         recurso: { label: 'Recurso', bg: 'bg-yellow-100 text-yellow-700' },
         tarea: { label: 'Tarea', bg: 'bg-red-100 text-red-700' },
-    }[contenido.tipo] ?? { label: contenido.tipo, bg: 'bg-gray-100 text-gray-600' };
+    }[tipoNormalizado] ?? { label: contenido.tipo, bg: 'bg-gray-100 text-gray-600' };
 
     let figureCounter = 0;
 
@@ -348,18 +352,36 @@ const UnidadPage = ({ contenido, onBack }) => {
                         </svg>
                         Fin de <span className="font-semibold text-gray-600 ml-1">{contenido.titulo}</span>
                     </div>
-                    {onBack && (
-                        <button
-                            onClick={onBack}
-                            className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white text-sm px-6 py-2.5 rounded-xl transition-colors shadow-sm font-medium"
-                        >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                            </svg>
-                            Regresar al curso
-                        </button>
-                    )}
+                    <div className="flex flex-col sm:flex-row items-center gap-3">
+                        {onNextSection && (
+                            <button
+                                onClick={onNextSection}
+                                className="inline-flex items-center gap-2 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white text-sm px-6 py-2.5 rounded-xl transition-colors shadow-sm font-medium"
+                            >
+                                Siguiente sección
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        )}
+                        {onBack && (
+                            <button
+                                onClick={onBack}
+                                className="inline-flex items-center gap-2 bg-green-600 hover:bg-green-700 active:bg-green-800 text-white text-sm px-6 py-2.5 rounded-xl transition-colors shadow-sm font-medium"
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                                Regresar al curso
+                            </button>
+                        )}
+                    </div>
                 </div>
+                {onNextSection && nextSectionLabel ? (
+                    <p className="mt-4 text-right text-xs text-gray-500">
+                        Sigue: <span className="font-medium text-gray-700">{nextSectionLabel}</span>
+                    </p>
+                ) : null}
             </main>
         </div>
     );

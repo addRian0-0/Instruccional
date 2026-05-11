@@ -1,18 +1,60 @@
 // pages/Course.jsx
 import React, { useState, useEffect } from 'react';
 import UnidadPage from './UnidadPage';
-import { CONTENIDOS_MOCK } from '../data/mockGuionDidactico';
-import { AreaComputacion } from '../data/enum';
-
-const mapViewToArea = {
-  "Teoría de Lenguajes": AreaComputacion.TEORIA_DE_LENGUAJES,
-  "Compiladores": AreaComputacion.COMPILADORES,
-  "Teoría de la Computación.": AreaComputacion.TEORIA_COMPUTACION
-};
+import { COURSE_TO_TIPO_MATERIA, fetchUnidadesPorMateria } from '../services/contenidoApi';
 
 const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [leccionActiva, setLeccionActiva] = useState(null);
+  const [unidades, setUnidades] = useState([]);
+  const [loadingUnidades, setLoadingUnidades] = useState(false);
+  const [errorUnidades, setErrorUnidades] = useState('');
+
+  useEffect(() => {
+    const tipoMateria = COURSE_TO_TIPO_MATERIA[courseName];
+
+    if (!tipoMateria) {
+      setUnidades([]);
+      setLoadingUnidades(false);
+      setErrorUnidades('');
+      return;
+    }
+
+    let cancelled = false;
+
+    const cargarUnidades = async () => {
+      setLoadingUnidades(true);
+      setErrorUnidades('');
+
+      try {
+        const unidadesApi = await fetchUnidadesPorMateria(tipoMateria);
+
+        if (!cancelled) {
+          setUnidades(unidadesApi);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setUnidades([]);
+          setErrorUnidades(
+            error instanceof Error
+              ? error.message
+              : 'No fue posible cargar el guión didáctico.',
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoadingUnidades(false);
+        }
+      }
+    };
+
+    cargarUnidades();
+    setLeccionActiva(null);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [courseName]);
 
   useEffect(() => {
     if (window.lucide) {
@@ -28,10 +70,39 @@ const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
     }
   }, [leccionActiva]);
 
+  useEffect(() => {
+    if (window.lucide) {
+      setTimeout(() => {
+        window.lucide.createIcons();
+      }, 50);
+    }
+  }, [unidades, loadingUnidades, errorUnidades]);
+
+  const contenidosOrdenados = unidades.flatMap(({ contenidos }) => contenidos);
+  const indiceLeccionActiva = contenidosOrdenados.findIndex(
+    (contenido) => contenido.contenido_id === leccionActiva?.contenido_id,
+  );
+  const siguienteLeccion =
+    indiceLeccionActiva >= 0 ? contenidosOrdenados[indiceLeccionActiva + 1] : null;
+
   if (leccionActiva) {
     return (
       <UnidadPage
         contenido={leccionActiva}
+        onNextSection={
+          siguienteLeccion
+            ? () => {
+                setLeccionActiva(siguienteLeccion);
+                setTimeout(() => {
+                  const contentArea = document.getElementById('contentArea');
+                  if (contentArea) {
+                    contentArea.scrollTop = 0;
+                  }
+                }, 50);
+              }
+            : null
+        }
+        nextSectionLabel={siguienteLeccion?.titulo || ''}
         onBack={() => {
           setLeccionActiva(null);
           setTimeout(() => {
@@ -44,29 +115,6 @@ const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
       />
     );
   }
-
-  const areaActual = mapViewToArea[courseName];
-
-  const contenidosFiltrados = CONTENIDOS_MOCK.filter(
-    (c) => c.area === areaActual
-  );
-
-  const unidades = contenidosFiltrados.reduce((acc, c) => {
-  const key = c.unidad_id;
-
-  if (!acc[key]) {
-    acc[key] = {
-      unidad: {
-        unidad_id: c.unidad.unidad_id,
-        nombre: c.unidad.nombre 
-      },
-      contenidos: []
-    };
-  }
-
-  acc[key].contenidos.push(c);
-  return acc;
-}, {});
 
   // Datos simulados para los documentos
   const documents = {
@@ -379,8 +427,26 @@ const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
                 Guión Didáctico
               </h3>
 
+              {loadingUnidades && (
+                <div className="rounded-lg border border-green-100 bg-green-50 px-4 py-3 text-sm text-green-800">
+                  Cargando contenidos desde `Project-Site-Backend`...
+                </div>
+              )}
+
+              {!loadingUnidades && errorUnidades && (
+                <div className="rounded-lg border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {errorUnidades}
+                </div>
+              )}
+
+              {!loadingUnidades && !errorUnidades && unidades.length === 0 && (
+                <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600">
+                  No hay unidades publicadas para esta materia.
+                </div>
+              )}
+
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-                {Object.values(unidades).map(({ unidad, contenidos }) => (
+                {unidades.map(({ unidad, contenidos }) => (
                   <div key={unidad.unidad_id} className="bg-green-50 rounded-lg p-5 space-y-3">
 
                     <p className="text-sm font-bold text-green-800 border-b border-green-200 pb-2">
