@@ -14,8 +14,19 @@ import AdminDashboard from './pages/AdminDashboard';
 import GenericPage from './pages/GenericPage';
 import SearchResults from './pages/SearchResults';
 import { mockFiles } from './data/mockData';
-import { obtenerUsuarioLogueado } from './utils/localStorage';
+import { cerrarSesion, obtenerUsuarioLogueado } from './utils/localStorage';
 import './index.css';
+
+const PROTECTED_COURSE_VIEWS = new Set([
+  'Teoría de la Computación.',
+  'Ambientes de Programacion.',
+  'Compiladores',
+  'Contexto Nacional III',
+  'Sistemas Operativos',
+  'SO en Red',
+  'Teoría de Lenguajes',
+  'UDF Maestria',
+]);
 
 function App() {
   const [currentView, setCurrentView] = useState('Inicio');
@@ -23,14 +34,12 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [usuarioLogueado, setUsuarioLogueado] = useState(null);
-  const [tipoUsuario, setTipoUsuario] = useState(null);
 
   // Verificar si hay usuario logueado al cargar
   useEffect(() => {
     const usuario = obtenerUsuarioLogueado();
     if (usuario) {
       setUsuarioLogueado(usuario);
-      setTipoUsuario(usuario.tipo);
       
       // Redirigir al dashboard correspondiente
       if (usuario.tipo === 'estudiante') {
@@ -58,7 +67,6 @@ function App() {
 
   const handleLoginSuccess = (usuario) => {
     setUsuarioLogueado(usuario);
-    setTipoUsuario(usuario.tipo);
 
     // Redirigir según tipo
     if (usuario.tipo === 'estudiante') {
@@ -71,72 +79,87 @@ function App() {
   };
 
   const handleLogout = () => {
+    cerrarSesion();
     setUsuarioLogueado(null);
-    setTipoUsuario(null);
     setCurrentView('Inicio');
+  };
+
+  const handleNavigate = (view) => {
+    if (!usuarioLogueado && PROTECTED_COURSE_VIEWS.has(view)) {
+      setCurrentView('Iniciar Sesión');
+      return;
+    }
+
+    setCurrentView(view);
   };
 
   const renderContent = () => {
     switch (currentView) {
       case 'Inicio':
-        return <Home onNavigate={setCurrentView} />;
+        return <Home onNavigate={handleNavigate} usuarioLogueado={usuarioLogueado} />;
 
       case 'Teoría de la Computación.':
-         return (
+        return usuarioLogueado ? (
           <Course
             courseName={currentView}
             currentPeriod={currentPeriod}
             onPeriodChange={setCurrentPeriod}
           />
+        ) : (
+          <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
-        
 
       // Las demás materias usan el componente genérico
       case 'Ambientes de Programacion.':
       case 'Compiladores':
-        return (
+        return usuarioLogueado ? (
           <Course
             courseName={currentView}
             currentPeriod={currentPeriod}
             onPeriodChange={setCurrentPeriod}
           />
+        ) : (
+          <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
       case 'Contexto Nacional III':
       case 'Sistemas Operativos':
       case 'SO en Red':
       case 'Teoría de Lenguajes':
-       
       case 'UDF Maestria':
-        return <OtherCourse courseName={currentView} />;
+        return usuarioLogueado ? (
+          <OtherCourse courseName={currentView} />
+        ) : (
+          <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
+        );
 
       case 'Contacto':
         return <Contact />;
 
       case 'Registrarse':
-        return <Register onNavigate={setCurrentView} />;
+        return <Register onNavigate={handleNavigate} />;
 
       case 'Iniciar Sesión':
-        return <Login onNavigate={setCurrentView} onLoginSuccess={handleLoginSuccess} />;
+        return <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />;
 
-      case 'StudentDashboard':
+      case 'Estudiante dashboard':
         return usuarioLogueado ? (
-          <StudentDashboard usuario={usuarioLogueado} onNavigate={setCurrentView} onLogout={handleLogout} />
+          <StudentDashboard usuario={usuarioLogueado} onNavigate={handleNavigate} onLogout={handleLogout} />
         ) : (
-          <Login onNavigate={setCurrentView} onLoginSuccess={handleLoginSuccess} />
+          <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
 
       case 'TeacherDashboard':
         return usuarioLogueado && usuarioLogueado.tipo === 'profesor' ? (
-          <TeacherDashboard usuario={usuarioLogueado} onNavigate={setCurrentView} onLogout={handleLogout} />
+          <TeacherDashboard usuario={usuarioLogueado} onNavigate={handleNavigate} onLogout={handleLogout} />
         ) : (
-          <Login onNavigate={setCurrentView} onLoginSuccess={handleLoginSuccess} />
+          <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
 
       case 'AdminDashboard':
         return usuarioLogueado && usuarioLogueado.tipo === 'admin' ? (
-          <AdminDashboard usuario={usuarioLogueado} onNavigate={setCurrentView} onLogout={handleLogout} />
+          <AdminDashboard usuario={usuarioLogueado} onNavigate={handleNavigate} onLogout={handleLogout} />
         ) : (
-          <Login onNavigate={setCurrentView} onLoginSuccess={handleLoginSuccess} />
+          <Login onNavigate={handleNavigate} onLoginSuccess={handleLoginSuccess} />
         );
 
       case 'Presentaciones':
@@ -148,7 +171,7 @@ function App() {
         return <SearchResults query={searchQuery} files={mockFiles} />;
 
       default:
-        return <Home onNavigate={setCurrentView} />;
+        return <Home onNavigate={handleNavigate} usuarioLogueado={usuarioLogueado} />;
     }
   };
 
@@ -161,7 +184,7 @@ function App() {
     <div className="flex h-screen overflow-hidden text-gray-800 bg-gray-50">
       <Sidebar
         currentView={currentView}
-        onNavigate={setCurrentView}
+        onNavigate={handleNavigate}
         isMobileOpen={isMobileMenuOpen}
         onMobileClose={() => setIsMobileMenuOpen(false)}
         usuarioLogueado={usuarioLogueado}

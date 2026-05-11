@@ -1,6 +1,6 @@
 // pages/Register.jsx
 import React from 'react';
-import { crearUsuario, obtenerGrupos, inicializarBD } from '../utils/auth';
+import { GRUPOS_DISPONIBLES, registrarAlumno } from '../services/authApi';
 
 const Register = ({ onNavigate }) => {
   const [formData, setFormData] = React.useState({
@@ -17,9 +17,7 @@ const Register = ({ onNavigate }) => {
   const [cargando, setCargando] = React.useState(false);
 
   React.useEffect(() => {
-    inicializarBD();
-    const gruposDisponibles = obtenerGrupos();
-    setGrupos(gruposDisponibles);
+    setGrupos(GRUPOS_DISPONIBLES);
   }, []);
 
   const handleInputChange = (e) => {
@@ -31,7 +29,7 @@ const Register = ({ onNavigate }) => {
     setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setCargando(true);
     setError('');
@@ -73,24 +71,22 @@ const Register = ({ onNavigate }) => {
       return;
     }
 
-    // Crear usuario
-    const resultado = crearUsuario({
-      nombre: formData.nombre,
-      apellido: formData.apellido,
-      email: formData.email,
-      password: formData.password,
-      grupo: formData.grupo,
-      tipo: 'estudiante'
-    });
+    try {
+      await registrarAlumno({
+        nombre: formData.nombre,
+        apellido: formData.apellido,
+        email: formData.email,
+        password: formData.password,
+        grupo: formData.grupo,
+      });
 
-    setCargando(false);
-
-    if (resultado.success) {
       alert('¡Registro exitoso! Ahora puedes iniciar sesión');
       setFormData({ nombre: '', apellido: '', email: '', password: '', confirmPassword: '', grupo: '' });
       onNavigate('Iniciar Sesión');
-    } else {
-      setError(resultado.error);
+    } catch (submitError) {
+      setError(submitError.message || 'No fue posible registrar la cuenta');
+    } finally {
+      setCargando(false);
     }
   };
 

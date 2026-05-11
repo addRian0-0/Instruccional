@@ -1,7 +1,7 @@
 // pages/Home.jsx
 import React from 'react';
 
-const Home = ({ onNavigate }) => {
+const Home = ({ onNavigate, usuarioLogueado }) => {
   React.useEffect(() => {
     if (window.lucide) {
       window.lucide.createIcons();
@@ -64,10 +64,10 @@ const Home = ({ onNavigate }) => {
             </li>
           </ul>
           <button
-            onClick={() => onNavigate('Teoría de la Computación.')}
+            onClick={() => onNavigate(usuarioLogueado ? 'Teoría de la Computación.' : 'Iniciar Sesión')}
             className="mt-4 w-full bg-[#6b2132] text-white py-2 rounded-lg text-sm hover:bg-opacity-90 transition"
           >
-            Ir a la materia
+            {usuarioLogueado ? 'Ir a la materia' : 'Inicia sesión para ver la materia'}
           </button>
         </div>
       </div>

@@ -100,12 +100,8 @@ const Sidebar = ({ currentView, onNavigate, isMobileOpen, onMobileClose, usuario
                 {courses.map((course) => (
                   <li key={course.name}>
                     <button
-                      onClick={() => handleNavigation(course.name)}
-                      className={`
-                        w-full text-left px-6 py-3 hover:bg-[#6b2132] hover:bg-opacity-80 
-                        transition flex items-center gap-3 text-sm
-                        ${currentView === course.name ? 'bg-gray-800 border-l-4 border-[#6b2132]' : ''}
-                      `}
+                      onClick={() => handleNavigation('Iniciar Sesión')}
+                      className="w-full text-left px-6 py-3 hover:bg-[#6b2132] hover:bg-opacity-80 transition flex items-center gap-3 text-sm text-gray-300"
                     >
                       <i data-lucide={course.icon} className="w-4 h-4"></i>
                       {course.name}
@@ -175,6 +171,27 @@ const Sidebar = ({ currentView, onNavigate, isMobileOpen, onMobileClose, usuario
               </ul>
 
               <div className="px-4 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Contenidos
+              </div>
+              <ul className="space-y-1">
+                {courses.map((course) => (
+                  <li key={course.name}>
+                    <button
+                      onClick={() => handleNavigation(course.name)}
+                      className={`
+                        w-full text-left px-6 py-3 hover:bg-blue-700
+                        transition flex items-center gap-3 text-sm
+                        ${currentView === course.name ? 'bg-gray-800 border-l-4 border-blue-500' : 'text-gray-300'}
+                      `}
+                    >
+                      <i data-lucide={course.icon} className="w-4 h-4"></i>
+                      {course.name}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="px-4 mt-6 mb-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                 General
               </div>
               <ul className="space-y-1">
@@ -182,7 +199,10 @@ const Sidebar = ({ currentView, onNavigate, isMobileOpen, onMobileClose, usuario
                   <li key={page.name}>
                     <button
                       onClick={() => handleNavigation(page.name)}
-                      className="w-full text-left px-6 py-3 hover:bg-gray-700 transition flex items-center gap-3 text-sm text-gray-300"
+                      className={`
+                        w-full text-left px-6 py-3 hover:bg-gray-700 transition flex items-center gap-3 text-sm
+                        ${currentView === page.name ? 'bg-gray-800 border-l-4 border-blue-500' : 'text-gray-300'}
+                      `}
                     >
                       <i data-lucide={page.icon} className="w-4 h-4"></i>
                       {page.name}

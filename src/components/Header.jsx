@@ -14,7 +14,7 @@ const Header = ({ title, onSearch, onMenuToggle }) => {
     <header className="bg-white shadow-sm z-10 sticky top-0">
       <div className="flex items-center justify-between px-6 py-3">
         <div className="flex items-center gap-4">
-          <button 
+          <button
             onClick={onMenuToggle}
             className="lg:hidden p-2 text-gray-600 hover:bg-gray-100 rounded"
           >
@@ -23,8 +23,7 @@ const Header = ({ title, onSearch, onMenuToggle }) => {
           <h1 className="text-xl font-bold text-[#6b2132]">{title}</h1>
         </div>
 
-        {/* Barra de búsqueda */}
-        <div className="relative w-full max-w-2xl mx-4 group">
+        {/* <div className="relative w-full max-w-2xl mx-4 group">
           <div className="flex items-center bg-gray-100 rounded-lg px-4 py-2 focus-within:ring-2 focus-within:ring-[#6b2132] transition-all shadow-inner">
             <i data-lucide="search" className="text-gray-500 w-5 h-5"></i>
             <input
@@ -35,15 +34,14 @@ const Header = ({ title, onSearch, onMenuToggle }) => {
               className="bg-transparent border-none outline-none w-full ml-3 text-sm"
               onFocus={() => setIsSearchPanelOpen(true)}
             />
-            <button 
+            <button
               className="p-1 hover:bg-gray-200 rounded text-gray-500"
               onClick={() => setIsSearchPanelOpen(true)}
             >
               <i data-lucide="sliders-horizontal" className="w-4 h-4"></i>
             </button>
-          </div>
+          </div> 
 
-          {/* Panel de Búsqueda Avanzada */}
           {isSearchPanelOpen && (
             <div className="absolute top-full left-0 right-0 bg-white shadow-xl rounded-b-lg border border-t-0 border-gray-200 p-4 mt-0 fade-in z-50">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -86,13 +84,13 @@ const Header = ({ title, onSearch, onMenuToggle }) => {
                 </div>
               </div>
               <div className="flex justify-end gap-2">
-                <button 
+                <button
                   onClick={() => setIsSearchPanelOpen(false)}
                   className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded"
                 >
                   Cerrar
                 </button>
-                <button 
+                <button
                   onClick={handleSearch}
                   className="px-4 py-2 text-sm bg-[#6b2132] text-white rounded hover:bg-opacity-90"
                 >
@@ -101,7 +99,7 @@ const Header = ({ title, onSearch, onMenuToggle }) => {
               </div>
             </div>
           )}
-        </div>
+        </div>*/}
 
         <div className="flex items-center gap-3">
           <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full" title="Ayuda">

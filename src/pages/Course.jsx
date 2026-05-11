@@ -118,7 +118,7 @@ const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
 
   // Datos simulados para los documentos
   const documents = {
-    contrato: '/docs/contrato_didactico.docx',
+    contrato: '../../public/ContratoDidactico.docx',
     introEvaluacion: 'https://www.youtube.com/embed/dummy',
     rubricas: {
       A: '/docs/rubrica_opcionA.pdf',
@@ -127,7 +127,7 @@ const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
       D: '/docs/rubrica_opcionD.pdf',
       E: '/docs/rubrica_opcionE.pdf',
     },
-    planeacion: '/docs/planeacion_didactica_periodo' + currentPeriod + '.docx',
+    planeacion: '../../public/planeacion_didactica_periodo' + currentPeriod + '.docx',
     guionDidactico: [
       { unidad: 1, file: '/docs/guion_unidad1.pdf' },
       { unidad: 2, file: '/docs/guion_unidad2.pdf' },
@@ -136,13 +136,13 @@ const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
       { unidad: 5, file: '/docs/guion_unidad5.pdf' },
     ],
     guias: {
-      ejercicios: '/docs/ejercicios_por_lista.docx',
-      preguntasConceptos: '/docs/preguntas_conceptos.docx',
+      ejercicios: '../../public/GUIAyEjerciciosExposiciones_2026-2.docx',
+      preguntasConceptos: '../../public/Preguntas-compiladores.pdf',
       preguntasGLC: '/docs/preguntas_glc.docx',
       evaluacionGLC: '/docs/evaluacion_glc.docx',
       practicas: {
-        msdos: '/docs/practicas_msdos.pdf',
-        awk: '/docs/practicas_awk.pdf',
+        msdos: '../../public/Practica_1_MS-DOS.docx',
+        awk: '../../public/Practica_2_awk_2022.docx',
         jflap: '/docs/guia_jflap.pdf',
         didacmax: '/docs/guia_didacmax.pdf',
       },

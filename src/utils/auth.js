@@ -164,7 +164,7 @@ export const inicializarBD = () => {
     ],
     submissions: {},
     calificaciones: {},
-    grupos: ['TC-01', 'TC-02', 'TC-03', 'TC-04']
+    grupos: ['TS-01', 'TS-02', 'TCS-03', 'TS-04']
   };
 
   localStorage.setItem('bd_compiladores', JSON.stringify(bd));

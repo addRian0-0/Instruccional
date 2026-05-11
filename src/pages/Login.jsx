@@ -1,7 +1,7 @@
 // pages/Login.jsx
 import React from 'react';
-import { validarCredenciales, inicializarBD } from '../utils/auth';
 import { guardarUsuarioLogueado } from '../utils/localStorage';
+import { iniciarSesionAlumno } from '../services/authApi';
 
 const Login = ({ onNavigate, onLoginSuccess }) => {
   const [formData, setFormData] = React.useState({
@@ -12,10 +12,6 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
   const [error, setError] = React.useState('');
   const [cargando, setCargando] = React.useState(false);
 
-  React.useEffect(() => {
-    inicializarBD();
-  }, []);
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -25,7 +21,7 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
     setError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setCargando(true);
     setError('');
@@ -36,21 +32,20 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
       return;
     }
 
-    // Validar credenciales
-    const resultado = validarCredenciales(formData.email, formData.password);
+    try {
+      const usuario = await iniciarSesionAlumno(formData);
 
-    if (resultado.success) {
       // Guardar usuario logueado
-      guardarUsuarioLogueado(resultado.usuario);
+      guardarUsuarioLogueado(usuario);
 
       alert('¡Bienvenido/a!');
       setFormData({ email: '', password: '' });
 
       // Redirigir según tipo de usuario
       if (onLoginSuccess) {
-        onLoginSuccess(resultado.usuario);
+        onLoginSuccess(usuario);
       } else {
-        switch (resultado.usuario.tipo) {
+        switch (usuario.tipo) {
           case 'estudiante':
             onNavigate('StudentDashboard');
             break;
@@ -64,11 +59,11 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
             onNavigate('Inicio');
         }
       }
-    } else {
-      setError(resultado.error);
+    } catch (submitError) {
+      setError(submitError.message || 'No fue posible iniciar sesión');
+    } finally {
+      setCargando(false);
     }
-
-    setCargando(false);
   };
 
   return (
@@ -138,18 +133,10 @@ const Login = ({ onNavigate, onLoginSuccess }) => {
           </div>
         </form>
 
-        <div className="mt-6 space-y-3">
+        <div className="mt-6">
           <div className="bg-blue-50 p-3 rounded-lg text-xs text-blue-800">
-            <p className="font-semibold mb-1">🧑‍🎓 Estudiante de prueba:</p>
-            <p>Email: juan@ipn.mx | Contraseña: Estudiante123</p>
-          </div>
-          <div className="bg-purple-50 p-3 rounded-lg text-xs text-purple-800">
-            <p className="font-semibold mb-1">👨‍🏫 Profesor de prueba:</p>
-            <p>Email: profesor@ipn.mx | Contraseña: Profesor123</p>
-          </div>
-          <div className="bg-red-50 p-3 rounded-lg text-xs text-red-800">
-            <p className="font-semibold mb-1">🔐 Admin de prueba:</p>
-            <p>Email: admin@ipn.mx | Contraseña: Admin123</p>
+            <p className="font-semibold mb-1">Acceso con backend</p>
+            <p>Inicia sesión con una cuenta registrada desde este formulario.</p>
           </div>
         </div>
 
