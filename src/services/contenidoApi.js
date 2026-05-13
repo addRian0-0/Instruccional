@@ -1,12 +1,9 @@
 import { CONTENIDOS_MOCK } from '../data/mockGuionDidactico';
 import { AreaComputacion } from '../data/enum';
+import { getGraphqlApiUrl, shouldUseMockGuion } from './apiConfig';
 
-const GRAPHQL_API_URL =
-  process.env.REACT_APP_GRAPHQL_API_URL || 'http://localhost:3001/graphql';
-
-const SHOULD_USE_MOCK =
-  process.env.REACT_APP_USE_MOCK_GUION === 'true' ||
-  process.env.NODE_ENV === 'production';
+const GRAPHQL_API_URL = getGraphqlApiUrl();
+const SHOULD_USE_MOCK = shouldUseMockGuion();
 
 export const COURSE_TO_TIPO_MATERIA = {
   'Teoría de Lenguajes': 'TEORIA_DE_LENGUAJES',

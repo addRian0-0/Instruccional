@@ -1,5 +1,6 @@
-const GRAPHQL_API_URL =
-  process.env.REACT_APP_GRAPHQL_API_URL || 'http://localhost:3001/graphql';
+import { getGraphqlApiUrl } from './apiConfig';
+
+const GRAPHQL_API_URL = getGraphqlApiUrl();
 
 export const GRUPOS_DISPONIBLES = ['TC-01', 'TC-02', 'TC-03', 'TC-04'];
 
