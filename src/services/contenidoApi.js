@@ -150,6 +150,15 @@ function normalizarRespuestaApi(unidades) {
   }));
 }
 
+function normalizarContenidoPlano(contenido) {
+  const unidad = contenido.unidad || {
+    id: contenido.unidadId,
+    nombre: `Unidad ${contenido.unidadId}`,
+  };
+
+  return normalizarContenido(contenido, unidad);
+}
+
 export async function fetchUnidadesPorMateria(tipoMateria) {
   if (SHOULD_USE_MOCK) {
     return fetchUnidadesDesdeMock(tipoMateria);
@@ -212,6 +221,71 @@ export async function fetchUnidadesPorMateria(tipoMateria) {
   );
 
   return normalizarRespuestaApi(data.unidades);
+}
+
+export async function fetchContenidosPorMateria(tipoMateria) {
+  if (SHOULD_USE_MOCK) {
+    const unidades = fetchUnidadesDesdeMock(tipoMateria);
+    return unidades.flatMap(({ contenidos }) => contenidos);
+  }
+
+  const data = await graphqlRequest(
+    `
+      query ContenidosPorMateria($tipoMateria: TipoMateria) {
+        contenidos(tipoMateria: $tipoMateria) {
+          id
+          titulo
+          descripcion
+          tipo
+          tipoMateria
+          orden
+          url_recurso
+          contenido
+          unidadId
+          unidad {
+            id
+            nombre
+          }
+          videos {
+            id
+            titulo
+            descripcion
+            youtubeUrl
+            youtubeId
+            tipos
+            publicado
+            contenidoId
+          }
+          asignaciones {
+            id
+            titulo
+            descripcion
+            porcentaje
+            periodo
+            grupo
+            entregable
+            rubrica
+            orden
+            activa
+            contenidoId
+            videos {
+              id
+              titulo
+              descripcion
+              youtubeUrl
+              youtubeId
+              tipos
+              publicado
+              contenidoId
+            }
+          }
+        }
+      }
+    `,
+    { tipoMateria },
+  );
+
+  return (data.contenidos || []).map(normalizarContenidoPlano);
 }
 
 export async function fetchAsignaciones({ periodo, contenidoId, grupo } = {}) {

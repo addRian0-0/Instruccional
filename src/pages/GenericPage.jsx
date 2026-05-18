@@ -1,6 +1,8 @@
 // pages/GenericPage.jsx
 import React from 'react';
 
+const asset = (fileName) => `/${encodeURI(fileName)}`;
+
 const GenericPage = ({ pageName }) => {
   // Contenido específico para cada página
   const renderContent = () => {
@@ -55,8 +57,8 @@ const GenericPage = ({ pageName }) => {
             <i data-lucide="file-text" className="w-16 h-16 text-gray-400 mb-4"></i>
             <p className="text-gray-500 text-center">
               El documento completo estará disponible próximamente.<br />
-              Versión preliminar: 
-              <a href="/docs/tesis_preliminar.pdf" download className="text-blue-600 hover:underline ml-1">Descargar borrador</a>
+              Material disponible:
+              <a href={asset('libro_TeoriaComputacion.pdf')} download className="text-blue-600 hover:underline ml-1">Descargar referencia</a>
             </p>
           </div>
         </div>

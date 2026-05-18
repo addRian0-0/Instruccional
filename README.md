@@ -229,3 +229,29 @@ Este flujo depende de que antes existan:
 ### Tab de contenidos
 
 El administrador comparte el mismo modulo de gestion de contenidos que el moderador.
+
+Videos a agregar
+
+unidad 5 IMplementador de un analizador sintactico
+https://www.youtube.com/embed/xdEAPpk-oGI?si=Vff0-LMHUfAhIIiR
+
+Unidad 2 Automatas finitos
+https://www.youtube.com/embed/mm30LqoW5XA?si=X6Fx9mBSoHZYt9rX
+
+Tema 7: DEFINICIÓN DE AFD Y SUS DOS REQUISITOS 
+https://www.youtube.com/embed/aWelqKymPAw?si=IdUigL4PACtE2oPg
+
+MÉTODOS FORMALES Y NO FORMALES
+https://www.youtube.com/embed/J8PUT33woko?si=fVJjKvgYZGZsRuyu
+
+Reto de programación 2 Didacmax2000 
+https://www.youtube.com/embed/4z4VXNP2-nU?si=K990yuoookJ3avIS
+
+Presentacion Curso Compiladores UPIICSA
+https://www.youtube.com/embed/2lpBQe6DYHA?si=YnusCr-m3uDVT7LO
+
+Presentacion de diferencias
+https://www.youtube.com/embed/tTxN9hTJ--c?si=gKLU_2DPJXkWgszg
+
+Automatas finitos
+https://www.youtube.com/embed/poBW6RzN1F0?si=qRx7BHrBaYithCl0

@@ -2,6 +2,7 @@ import React from 'react';
 import {
   COURSE_TO_TIPO_MATERIA,
   fetchUnidadesPorMateria,
+  fetchContenidosPorMateria,
   crearUnidad,
   actualizarUnidad,
   eliminarUnidad,
@@ -139,19 +140,43 @@ function sortUnits(unidades) {
   return [...unidades].sort((a, b) => a.unidad.unidad_id - b.unidad.unidad_id);
 }
 
+function sortContents(contenidos) {
+  return [...contenidos].sort((a, b) => {
+    const unidadA = Number(a.unidad?.unidad_id || a.unidad_id || 0);
+    const unidadB = Number(b.unidad?.unidad_id || b.unidad_id || 0);
+
+    if (unidadA !== unidadB) {
+      return unidadA - unidadB;
+    }
+
+    const ordenA = Number(a.orden || 0);
+    const ordenB = Number(b.orden || 0);
+
+    if (ordenA !== ordenB) {
+      return ordenA - ordenB;
+    }
+
+    return Number(a.contenido_id || 0) - Number(b.contenido_id || 0);
+  });
+}
+
 const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
   const [selectedCourse, setSelectedCourse] = React.useState(COURSE_OPTIONS[0][0]);
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
   const [success, setSuccess] = React.useState('');
   const [unidades, setUnidades] = React.useState([]);
+  const [catalogoContenidos, setCatalogoContenidos] = React.useState([]);
   const [unitDraft, setUnitDraft] = React.useState({ id: null, nombre: '' });
   const [contentDraft, setContentDraft] = React.useState(INITIAL_CONTENT);
   const [videoDraft, setVideoDraft] = React.useState(INITIAL_VIDEO);
   const [assignmentDraft, setAssignmentDraft] = React.useState(INITIAL_ASSIGNMENT);
 
   const tipoMateria = COURSE_TO_TIPO_MATERIA[selectedCourse];
-  const contenidos = React.useMemo(() => mapUnitList(unidades), [unidades]);
+  const contenidos = React.useMemo(
+    () => (catalogoContenidos.length ? sortContents(catalogoContenidos) : sortContents(mapUnitList(unidades))),
+    [catalogoContenidos, unidades],
+  );
   const videoLinkOptions = React.useMemo(() => {
     const content = contenidos.find(
       (item) => Number(item.contenido_id) === Number(assignmentDraft.contenidoId),
@@ -169,8 +194,40 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
     setLoading(true);
     setError('');
     try {
-      const data = await fetchUnidadesPorMateria(tipoMateria);
-      setUnidades(data);
+      const [unidadesData, contenidosData] = await Promise.all([
+        fetchUnidadesPorMateria(tipoMateria),
+        fetchContenidosPorMateria(tipoMateria),
+      ]);
+
+      const contenidosOrdenados = sortContents(contenidosData);
+      const unidadMap = new Map();
+
+      unidadesData.forEach(({ unidad }) => {
+        unidadMap.set(Number(unidad.unidad_id), unidad);
+      });
+
+      contenidosOrdenados.forEach((contenido) => {
+        if (contenido.unidad) {
+          unidadMap.set(Number(contenido.unidad.unidad_id), contenido.unidad);
+        }
+      });
+
+      const contenidosPorUnidad = contenidosOrdenados.reduce((acc, contenido) => {
+        const unidadId = Number(contenido.unidad_id);
+        if (!acc.has(unidadId)) {
+          acc.set(unidadId, []);
+        }
+        acc.get(unidadId).push(contenido);
+        return acc;
+      }, new Map());
+
+      const mergedUnits = Array.from(unidadMap.values()).map((unidad) => ({
+        unidad,
+        contenidos: contenidosPorUnidad.get(Number(unidad.unidad_id)) || [],
+      }));
+
+      setCatalogoContenidos(contenidosOrdenados);
+      setUnidades(sortUnits(mergedUnits));
     } catch (loadError) {
       setError(loadError.message || 'No fue posible cargar el catálogo.');
     } finally {
@@ -181,6 +238,13 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
   React.useEffect(() => {
     cargarContenido();
   }, [cargarContenido]);
+
+  React.useEffect(() => {
+    setUnitDraft({ id: null, nombre: '' });
+    setContentDraft(INITIAL_CONTENT);
+    setVideoDraft(INITIAL_VIDEO);
+    setAssignmentDraft(INITIAL_ASSIGNMENT);
+  }, [selectedCourse]);
 
   const resetMessages = () => {
     setError('');
@@ -490,7 +554,7 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
             <option value="">Selecciona un tema</option>
             {contenidos.map((contenido) => (
               <option key={contenido.contenido_id} value={contenido.contenido_id}>
-                {contenido.titulo}
+                {contenido.unidad?.nombre ? `${contenido.unidad.nombre} · ${contenido.titulo}` : contenido.titulo}
               </option>
             ))}
           </select>
@@ -556,7 +620,7 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
             <option value="">Selecciona un tema</option>
             {contenidos.map((contenido) => (
               <option key={contenido.contenido_id} value={contenido.contenido_id}>
-                {contenido.titulo}
+                {contenido.unidad?.nombre ? `${contenido.unidad.nombre} · ${contenido.titulo}` : contenido.titulo}
               </option>
             ))}
           </select>

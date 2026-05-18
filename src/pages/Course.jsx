@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import UnidadPage from './UnidadPage';
 import { COURSE_TO_TIPO_MATERIA, fetchUnidadesPorMateria } from '../services/contenidoApi';
 
+const asset = (fileName) => `/${encodeURI(fileName)}`;
+
 const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [leccionActiva, setLeccionActiva] = useState(null);
@@ -118,46 +120,54 @@ const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
 
   // Datos simulados para los documentos
   const documents = {
-    contrato: '../../public/ContratoDidactico.docx',
+    contrato: asset('ContratoDidáctico.docx'),
     introEvaluacion: 'https://www.youtube.com/embed/dummy',
-    rubricas: {
-      A: '/docs/rubrica_opcionA.pdf',
-      B: '/docs/rubrica_opcionB.pdf',
-      C: '/docs/rubrica_opcionC.pdf',
-      D: '/docs/rubrica_opcionD.pdf',
-      E: '/docs/rubrica_opcionE.pdf',
-    },
-    planeacion: '../../public/planeacion_didactica_periodo' + currentPeriod + '.docx',
-    guionDidactico: [
-      { unidad: 1, file: '/docs/guion_unidad1.pdf' },
-      { unidad: 2, file: '/docs/guion_unidad2.pdf' },
-      { unidad: 3, file: '/docs/guion_unidad3.pdf' },
-      { unidad: 4, file: '/docs/guion_unidad4.pdf' }, // faltan 2
-      { unidad: 5, file: '/docs/guion_unidad5.pdf' },
+    rubricas: [
+      { titulo: 'Lista de cotejo', file: asset('______LISTA_COTEJO_1P_Marzo2026.docx') },
+      { titulo: 'Hoja de respuestas', file: asset('HojaRespuestas_ParaLlenar.pdf') },
+      { titulo: 'Puntos básicos para un ensayo', file: asset('Puntos basicos para un ENSAYO.pdf') },
+      { titulo: 'Apuntes TLC 2023', file: asset('APUNTES_TLC_2023.pdf') },
+      { titulo: 'Cuestionario 14 nov', file: asset('cuestionario14-nov.docx') },
     ],
+    planeacion: asset('Planeacion_Didactica.doc'),
+    guionDidactico: asset('Guion Didactico.docx'),
     guias: {
-      ejercicios: '../../public/GUIAyEjerciciosExposiciones_2026-2.docx',
-      preguntasConceptos: '../../public/Preguntas-compiladores.pdf',
-      preguntasGLC: '/docs/preguntas_glc.docx',
-      evaluacionGLC: '/docs/evaluacion_glc.docx',
-      practicas: {
-        msdos: '../../public/Practica_1_MS-DOS.docx',
-        awk: '../../public/Practica_2_awk_2022.docx',
-        jflap: '/docs/guia_jflap.pdf',
-        didacmax: '/docs/guia_didacmax.pdf',
-      },
+      ejercicios: asset('GUIAyEjerciciosExposiciones_2026-2.docx'),
+      preguntasConceptos: asset('Preguntas-compiladores.pdf'),
+      preguntasGLC: asset('Cuestionario_GLC.docx'),
+      evaluacionGLC: asset('GLC_importancia - Cuestionario.doc'),
+      practicas: [
+        { titulo: 'MS-DOS / JCL', file: asset('Practica1 - MS_DOS.pdf') },
+        { titulo: 'AWK PDF', file: asset('Practica2_AWK.pdf') },
+        { titulo: 'AWK Word', file: asset('Practica_2_awk_2022.docx') },
+        { titulo: 'AWK práctica 3', file: asset('Practica3_AWK.pdf') },
+      ],
     },
-    reposicion: '/docs/evaluaciones_reposicion.pdf',
+    reposicion: asset('cuestionario14-nov.docx'),
     proyectosAnteriores: [
-      { titulo: 'Analizador Léxico en C', autor: 'Juan Pérez', año: 2022, file: '/docs/proyecto_lexico.pdf' },
-      { titulo: 'Compilador Didáctico', autor: 'Ana López', año: 2023, file: '/docs/proyecto_compilador.pdf' },
-      { titulo: 'Autómatas con JFLAP', autor: 'Carlos Ruiz', año: 2021, file: '/docs/proyecto_automatas.pdf' },
+      { titulo: 'Libro de Teoría de la Computación', autor: 'Material de apoyo', año: 2023, file: asset('libro_TeoriaComputacion.pdf') },
+      { titulo: 'Prontuario AWK', autor: 'Material de apoyo', año: 2023, file: asset('prontuario_AWK.txt') },
+      { titulo: 'Código fuente AWK', autor: 'Material de apoyo', año: 2023, file: asset('sourceAWK.txt') },
     ],
-    tesis: '/docs/tesis_diseno_instruccional.pdf',
+    adicionales: [
+      { titulo: 'Guión Didáctico', file: asset('Guion Didactico.docx') },
+      { titulo: 'Práctica 1 MS-DOS (Word)', file: asset('Practica_1_MS-DOS.docx') },
+      { titulo: 'LANGUAGE.TXT', file: asset('LANGUAGE.TXT') },
+      { titulo: 'Qué hace - Código en AWK', file: asset('Qué hace - Código en AWK') },
+    ],
   };
 
   const handleProtectedDownload = () => {
     setShowPasswordModal(true);
+  };
+
+  const downloadFile = (file) => {
+    const link = document.createElement('a');
+    link.href = file;
+    link.download = '';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -258,10 +268,10 @@ const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
               Opciones de evaluación con rúbricas descargables.
             </p>
             <div className="space-y-2 max-h-60 overflow-y-auto">
-              {['A: Evaluación Continua', 'B: Participaciones', 'C: Presentaciones', 'D: Proyecto Excelente', 'E: Exámenes'].map((opt, idx) => (
-                <div key={idx} className="flex items-center justify-between bg-green-50 p-2 rounded">
-                  <span className="text-sm">{opt}</span>
-                  <a href={documents.rubricas[['A', 'B', 'C', 'D', 'E'][idx]]} download className="text-green-700 hover:text-green-900">
+              {documents.rubricas.map((rubrica) => (
+                <div key={rubrica.titulo} className="flex items-center justify-between bg-green-50 p-2 rounded">
+                  <span className="text-sm">{rubrica.titulo}</span>
+                  <a href={rubrica.file} download className="text-green-700 hover:text-green-900">
                     <i data-lucide="download" className="w-4 h-4"></i>
                   </a>
                 </div>
@@ -324,24 +334,14 @@ const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
               </li>
             </ul>
             <details className="mt-3">
-              <summary className="text-sm text-green-700 cursor-pointer">Prácticas (MS-DOS, AWK, JFLAP, DIDACMAX)</summary>
+              <summary className="text-sm text-green-700 cursor-pointer">Prácticas (MS-DOS y AWK)</summary>
               <div className="mt-2 space-y-2 pl-2">
-                <div className="flex justify-between">
-                  MS-DOS / JCL
-                  <a href={documents.guias.practicas.msdos} download className="text-green-700">📥</a>
-                </div>
-                <div className="flex justify-between">
-                  AWK
-                  <a href={documents.guias.practicas.awk} download className="text-green-700">📥</a>
-                </div>
-                <div className="flex justify-between">
-                  JFLAP
-                  <a href={documents.guias.practicas.jflap} download className="text-green-700">📥</a>
-                </div>
-                <div className="flex justify-between">
-                  DIDACMAX 2000
-                  <a href={documents.guias.practicas.didacmax} download className="text-green-700">📥</a>
-                </div>
+                {documents.guias.practicas.map((practica) => (
+                  <div key={practica.titulo} className="flex justify-between">
+                    {practica.titulo}
+                    <a href={practica.file} download className="text-green-700">📥</a>
+                  </div>
+                ))}
               </div>
             </details>
           </div>
@@ -395,6 +395,27 @@ const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
           </div>
         </div>
 
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
+          <div className="bg-green-600 h-2"></div>
+          <div className="p-5">
+            <h3 className="font-bold text-gray-800 flex items-center gap-2 mb-2">
+              <i data-lucide="folder-open" className="text-green-600 w-5 h-5"></i>
+              Material adicional
+            </h3>
+            <p className="text-xs text-gray-500 mb-3">
+              Archivos extra disponibles en la carpeta pública.
+            </p>
+            <div className="space-y-2">
+              {documents.adicionales.map((archivo) => (
+                <div key={archivo.titulo} className="flex items-center justify-between bg-green-50 p-2 rounded">
+                  <span className="text-sm">{archivo.titulo}</span>
+                  <a href={archivo.file} download className="text-green-700">📥</a>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         {/* Tesis Doctoral */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
           <div className="bg-green-600 h-2"></div>
@@ -422,10 +443,20 @@ const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition">
             <div className="bg-green-600 h-2"></div>
             <div className="p-5">
-              <h3 className="font-bold text-gray-800 flex items-center gap-2 mb-2">
-                <i data-lucide="book" className="text-green-600 w-5 h-5"></i>
-                Guión Didáctico
-              </h3>
+              <div className="mb-2 flex items-center justify-between gap-3">
+                <h3 className="font-bold text-gray-800 flex items-center gap-2">
+                  <i data-lucide="book" className="text-green-600 w-5 h-5"></i>
+                  Guión Didáctico
+                </h3>
+                <a
+                  href={documents.guionDidactico}
+                  download
+                  className="inline-flex items-center gap-2 rounded-lg bg-green-100 px-3 py-2 text-sm text-green-800 hover:bg-green-200"
+                >
+                  <i data-lucide="download" className="w-4 h-4"></i>
+                  Descargar archivo
+                </a>
+              </div>
 
               {loadingUnidades && (
                 <div className="rounded-lg border border-green-100 bg-green-50 px-4 py-3 text-sm text-green-800">
@@ -499,7 +530,7 @@ const Course = ({ courseName, currentPeriod, onPeriodChange }) => {
                 </button>
                 <button
                   onClick={() => {
-                    alert('Descarga simulada (contraseña correcta)');
+                    downloadFile(documents.reposicion);
                     setShowPasswordModal(false);
                   }}
                   className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
