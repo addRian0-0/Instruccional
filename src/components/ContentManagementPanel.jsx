@@ -39,6 +39,7 @@ const INITIAL_VIDEO = {
   youtubeUrl: '',
   tipos: ['APRENDIZAJE'],
   publicado: true,
+  unidadId: '',
   contenidoId: '',
   asignacionIds: [],
 };
@@ -54,6 +55,7 @@ const INITIAL_ASSIGNMENT = {
   rubrica: '',
   orden: 1,
   activa: true,
+  unidadId: '',
   contenidoId: '',
   videoIds: [],
 };
@@ -173,22 +175,45 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
   const [assignmentDraft, setAssignmentDraft] = React.useState(INITIAL_ASSIGNMENT);
 
   const tipoMateria = COURSE_TO_TIPO_MATERIA[selectedCourse];
+  const opcionesUnidad = React.useMemo(
+    () => unidades.map(({ unidad }) => unidad),
+    [unidades],
+  );
   const contenidos = React.useMemo(
     () => (catalogoContenidos.length ? sortContents(catalogoContenidos) : sortContents(mapUnitList(unidades))),
     [catalogoContenidos, unidades],
   );
+  const contenidosVideo = React.useMemo(
+    () =>
+      contenidos.filter((contenido) =>
+        videoDraft.unidadId
+          ? Number(contenido.unidad_id) === Number(videoDraft.unidadId)
+          : true,
+      ),
+    [contenidos, videoDraft.unidadId],
+  );
+  const contenidosAsignacion = React.useMemo(
+    () =>
+      contenidos.filter((contenido) =>
+        assignmentDraft.unidadId
+          ? Number(contenido.unidad_id) === Number(assignmentDraft.unidadId)
+          : true,
+      ),
+    [assignmentDraft.unidadId, contenidos],
+  );
+  const findContenidoById = React.useCallback(
+    (contenidoId) =>
+      contenidos.find((item) => Number(item.contenido_id) === Number(contenidoId)),
+    [contenidos],
+  );
   const videoLinkOptions = React.useMemo(() => {
-    const content = contenidos.find(
-      (item) => Number(item.contenido_id) === Number(assignmentDraft.contenidoId),
-    );
+    const content = findContenidoById(assignmentDraft.contenidoId);
     return (content?.videos || []).map((item) => ({ id: item.id, label: item.titulo }));
-  }, [assignmentDraft.contenidoId, contenidos]);
+  }, [assignmentDraft.contenidoId, findContenidoById]);
   const assignmentLinkOptions = React.useMemo(() => {
-    const content = contenidos.find(
-      (item) => Number(item.contenido_id) === Number(videoDraft.contenidoId),
-    );
+    const content = findContenidoById(videoDraft.contenidoId);
     return (content?.asignaciones || []).map((item) => ({ id: item.id, label: item.titulo }));
-  }, [contenidos, videoDraft.contenidoId]);
+  }, [findContenidoById, videoDraft.contenidoId]);
 
   const cargarContenido = React.useCallback(async () => {
     setLoading(true);
@@ -325,15 +350,16 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
     event.preventDefault();
     resetMessages();
     try {
+      const { unidadId, ...videoPayload } = videoDraft;
       if (videoDraft.id) {
         await actualizarVideo({
-          ...videoDraft,
+          ...videoPayload,
           contenidoId: Number(videoDraft.contenidoId),
         });
         showSuccess('Video actualizado.');
       } else {
         await crearVideo({
-          ...videoDraft,
+          ...videoPayload,
           contenidoId: Number(videoDraft.contenidoId),
         });
         showSuccess('Video creado.');
@@ -349,8 +375,9 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
     event.preventDefault();
     resetMessages();
     try {
+      const { unidadId, ...assignmentPayload } = assignmentDraft;
       const payload = {
-        ...assignmentDraft,
+        ...assignmentPayload,
         contenidoId: Number(assignmentDraft.contenidoId),
       };
 
@@ -382,6 +409,7 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
   };
 
   const startEditVideo = (video) => {
+    const contenido = findContenidoById(video.contenidoId);
     setVideoDraft({
       id: video.id,
       titulo: video.titulo,
@@ -389,12 +417,14 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
       youtubeUrl: video.youtubeUrl,
       tipos: video.tipos || [],
       publicado: video.publicado,
+      unidadId: contenido?.unidad_id || '',
       contenidoId: video.contenidoId,
       asignacionIds: (video.asignaciones || []).map((item) => item.id),
     });
   };
 
   const startEditAssignment = (asignacion) => {
+    const contenido = findContenidoById(asignacion.contenidoId);
     setAssignmentDraft({
       id: asignacion.id,
       titulo: asignacion.titulo,
@@ -406,6 +436,7 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
       rubrica: asignacion.rubrica,
       orden: asignacion.orden,
       activa: asignacion.activa,
+      unidadId: contenido?.unidad_id || '',
       contenidoId: asignacion.contenidoId,
       videoIds: (asignacion.videos || []).map((item) => item.id),
     });
@@ -546,13 +577,39 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
         <form onSubmit={handleVideoSubmit} className="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
           <h3 className="text-lg font-bold text-gray-900">Video de YouTube</h3>
           <select
+            value={videoDraft.unidadId}
+            onChange={(event) =>
+              setVideoDraft({
+                ...videoDraft,
+                unidadId: event.target.value,
+                contenidoId: '',
+                asignacionIds: [],
+              })
+            }
+            className="w-full rounded-lg border border-gray-300 px-4 py-2"
+            required
+          >
+            <option value="">Selecciona una unidad</option>
+            {opcionesUnidad.map((unidad) => (
+              <option key={unidad.unidad_id} value={unidad.unidad_id}>
+                {unidad.nombre}
+              </option>
+            ))}
+          </select>
+          <select
             value={videoDraft.contenidoId}
-            onChange={(event) => setVideoDraft({ ...videoDraft, contenidoId: event.target.value })}
+            onChange={(event) =>
+              setVideoDraft({
+                ...videoDraft,
+                contenidoId: event.target.value,
+                asignacionIds: [],
+              })
+            }
             className="w-full rounded-lg border border-gray-300 px-4 py-2"
             required
           >
             <option value="">Selecciona un tema</option>
-            {contenidos.map((contenido) => (
+            {contenidosVideo.map((contenido) => (
               <option key={contenido.contenido_id} value={contenido.contenido_id}>
                 {contenido.unidad?.nombre ? `${contenido.unidad.nombre} · ${contenido.titulo}` : contenido.titulo}
               </option>
@@ -610,15 +667,39 @@ const ContentManagementPanel = ({ roleLabel = 'Moderación' }) => {
         >
           <h3 className="text-lg font-bold text-gray-900">Asignación dinámica</h3>
           <select
+            value={assignmentDraft.unidadId}
+            onChange={(event) =>
+              setAssignmentDraft({
+                ...assignmentDraft,
+                unidadId: event.target.value,
+                contenidoId: '',
+                videoIds: [],
+              })
+            }
+            className="w-full rounded-lg border border-gray-300 px-4 py-2"
+            required
+          >
+            <option value="">Selecciona una unidad</option>
+            {opcionesUnidad.map((unidad) => (
+              <option key={unidad.unidad_id} value={unidad.unidad_id}>
+                {unidad.nombre}
+              </option>
+            ))}
+          </select>
+          <select
             value={assignmentDraft.contenidoId}
             onChange={(event) =>
-              setAssignmentDraft({ ...assignmentDraft, contenidoId: event.target.value })
+              setAssignmentDraft({
+                ...assignmentDraft,
+                contenidoId: event.target.value,
+                videoIds: [],
+              })
             }
             className="w-full rounded-lg border border-gray-300 px-4 py-2"
             required
           >
             <option value="">Selecciona un tema</option>
-            {contenidos.map((contenido) => (
+            {contenidosAsignacion.map((contenido) => (
               <option key={contenido.contenido_id} value={contenido.contenido_id}>
                 {contenido.unidad?.nombre ? `${contenido.unidad.nombre} · ${contenido.titulo}` : contenido.titulo}
               </option>
