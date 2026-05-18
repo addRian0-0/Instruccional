@@ -30,7 +30,6 @@ const PROTECTED_COURSE_VIEWS = new Set([
   'Contexto Nacional III',
   'Sistemas Operativos',
   'SO en Red',
-  'Teoría de Lenguajes',
   'UDF Maestria',
 ]);
 
@@ -130,7 +129,6 @@ function App() {
       case 'Contexto Nacional III':
       case 'Sistemas Operativos':
       case 'SO en Red':
-      case 'Teoría de Lenguajes':
       case 'UDF Maestria':
         return usuarioLogueado ? (
           <OtherCourse courseName={currentView} />

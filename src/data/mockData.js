@@ -101,8 +101,7 @@ export const courses = [
   { id: 4, name: 'Sistemas Operativos', icon: 'cpu' },
   { id: 5, name: 'SO en Red', icon: 'network' },
   { id: 6, name: 'Teoría de la Computación.', icon: 'book-open' },
-  { id: 7, name: 'Teoría Leng. y Comp.', icon: 'terminal' },
-  { id: 8, name: 'Maestría Educación', icon: 'graduation-cap' }
+  { id: 7, name: 'Maestría Educación', icon: 'graduation-cap' }
 ];
 
 export const announcements = [

@@ -7,13 +7,11 @@ const GRAPHQL_API_URL = getGraphqlApiUrl();
 const SHOULD_USE_MOCK = shouldUseMockGuion();
 
 export const COURSE_TO_TIPO_MATERIA = {
-  'Teoría de Lenguajes': 'TEORIA_DE_LENGUAJES',
   Compiladores: 'COMPILADORES',
   'Teoría de la Computación.': 'TEORIA_DE_LA_COMPUTACION',
 };
 
 const TIPO_MATERIA_TO_AREA = {
-  TEORIA_DE_LENGUAJES: AreaComputacion.TEORIA_DE_LENGUAJES,
   COMPILADORES: AreaComputacion.COMPILADORES,
   TEORIA_DE_LA_COMPUTACION: AreaComputacion.TEORIA_COMPUTACION,
 };
